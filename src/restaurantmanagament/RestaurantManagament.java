@@ -1,30 +1,36 @@
 package restaurantmanagament;
 
-//müşteriler customer sıraya girecek
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
-// garson sipariş alacka
-// aşçı sipariş hazırlar
-// kasiyer hesap alır
 public class RestaurantManagament {
-
-    //nesneler ve threadleri burada oluşturulacak senkronizasyon olacak.
-    //müşteri threadleri arasında masa seçimi ve oturma sırası senkronize olacak.
-    //garson threadleri sipariş alırken senkronize olacak
-    //aşçı threadleri kendi arasında senkronize olacak
-    //kasa threadi tek zaten
-    private static Queue<Customer> customerQueue = new LinkedList<>();    // müşteri sırası için bir kuyruk
-    private static Queue<Customer> priorityCustomerQueue = new LinkedList<>(); // öncelikli müşteri sırası için bir kuyruk
-    private static List<Table> tables = new ArrayList<>();        // boş masalardan oluşan bir liste
+    private static Queue<Customer> customerQueue = new LinkedList<>();
+    private static Queue<Customer> priorityCustomerQueue = new LinkedList<>();
+    private static List<Table> tables = new ArrayList<>();
     private static List<Waiter> waiters = new ArrayList<>();
-    
+
+    private static final int TABLE_COST = 1;
+    private static final int WAITER_COST = 1;
+    private static final int CHEF_COST = 1;
+    private static final int CUSTOMER_PROFIT = 1;
+
+    private static final int ARRIVAL_INTERVAL = 5;
+    private static final int PRIORITY_CUSTOMER_RATIO = 5;
+    private static final int SIMULATION_TIME = 180;
+
+    private static final int CUSTOMER_WAITING_TIME = 20; // seconds
+    private static final int ORDER_TAKING_TIME = 2; // seconds
+    private static final int COOKING_TIME = 3; // seconds
+    private static final int EATING_TIME = 3; // seconds
+    private static final int PAYMENT_TIME = 1; // seconds
+    private static int totalCustomerCount = 0;
+    private static int totalPriorityCustomerCount = 0;
+
+
+
     public static void main(String[] args) {
-        
+
+        takeOrders();
+
         Table table1 = new Table(1, "table1");
         Table table2 = new Table(2, "table2");
         Table table3 = new Table(3, "table3");
@@ -37,157 +43,210 @@ public class RestaurantManagament {
         tables.add(table4);
         tables.add(table5);
         tables.add(table6);
-        
+
         Waiter waiter1 = new Waiter(1, "waiter1");
         Waiter waiter2 = new Waiter(2, "waiter2");
         Waiter waiter3 = new Waiter(3, "waiter3");
         waiters.add(waiter1);
         waiters.add(waiter2);
         waiters.add(waiter3);
-        
+
         Chef chef1 = new Chef(1, "chef1");
         Chef chef2 = new Chef(2, "chef2");
         Cashier cashier1 = new Cashier(1, "cashier1");
-        
+
         createCustomers();
-        System.out.println("Adım 1 : " + (priorityCustomerQueue.size() + customerQueue.size()) + " müşteri geldi."
-                + " Öncelikli müşteri sayısı : " + priorityCustomerQueue.size());
-        
-        sitCustomers();
-        int doluMasa = 0;
-        //masalarda kim oturuyor ? 
+        System.out.println("Step 1: " + (priorityCustomerQueue.size() + customerQueue.size()) + " customers arrived."
+                + " Priority customer count: " + priorityCustomerQueue.size());
+
+        seatCustomers();
+        int occupiedTables = 0;
         for (Table table : tables) {
             if (table.getCustomer() != null) {
-                doluMasa++;
+                occupiedTables++;
                 System.out.println("Table " + table.getId() + ": " + table.getCustomer().getName() + " is sitting.");
             } else {
-                System.out.println("Table " + table.getId() + ": boş");
+                System.out.println("Table " + table.getId() + ": empty");
             }
         }
-        System.out.println("Adım 2 : " + doluMasa + " müşteri masalara yerşeitirildi. " + (priorityCustomerQueue.size() + customerQueue.size())
-                + " müşteri beklemede.");
+        System.out.println("Step 2: " + occupiedTables + " customers seated at tables. " + (priorityCustomerQueue.size() + customerQueue.size())
+                + " customers in waiting.");
 
-        /*
-        System.out.println("");
-        System.out.println("");
+        simulateRestaurantProcesses();
 
-        System.out.println("normal liste");
-        Iterator<Customer> iterator = customerQueue.iterator();
-        while (iterator.hasNext()) {
-            Customer customer = iterator.next();
-            System.out.println("Customer Name: " + customer.getName() + "customer önceliği : " + customer.isPriority());
-        }
 
-        System.out.println("öncelikli liste");
-        Iterator<Customer> iterator2 = priorityCustomerQueue.iterator();
-        while (iterator2.hasNext()) {
-            Customer customer = iterator2.next();
-            System.out.println("Customer Name: " + customer.getName() + "customer önceliği : " + customer.isPriority());
-        }*/
+
+        int tableCount = totalCustomerCount / 4;
+        int waiterCount = tableCount / 2;
+        int chefCount = waiterCount / 4;
+
+        int totalCost = (tableCount * TABLE_COST) + (waiterCount * WAITER_COST) + (chefCount * CHEF_COST);
+        int totalProfit = totalCustomerCount * CUSTOMER_PROFIT;
+        int profit = totalProfit - totalCost;
+
+        System.out.println("\nTotal Customer Count: " + totalCustomerCount);
+        System.out.println("Total Priority Customer Count: " + totalPriorityCustomerCount);
+        System.out.println("Total Table Count: " + tableCount);
+        System.out.println("Total Waiter Count: " + waiterCount);
+        System.out.println("Total Chef Count: " + chefCount);
+        System.out.println("Total Cost: " + totalCost);
+        System.out.println("Total Profit: " + totalProfit);
+        System.out.println("Profit: " + profit);
     }
-
-    //bir seferde en fazla 10 müşteri oluşturan fonksiyon.
     private static void createCustomers() {
-        
         Random random = new Random();
         int customerId = 1;
-
-        // rastgele müşteri sayısı üret    max:10
         int numberOfCustomers = random.nextInt(10) + 1;
-        
-        for (int i = 0; i < numberOfCustomers; i++) {
-            // rastgele müşteri
-            Customer customer = new Customer(customerId, "Customer" + customerId, random.nextBoolean());
 
-            // Müşteri thread'ini başlatın
+        // Ensure that we have enough tables for all customers
+        if (numberOfCustomers > tables.size()) {
+            System.out.println("Not enough tables for all customers.");
+            return;
+        }
+
+        for (int i = 0; i < numberOfCustomers; i++) {
+            Customer customer = new Customer(customerId, "Customer" + customerId, random.nextBoolean());
             Thread customerThread = new Thread(customer);
             customerThread.start();
 
-            //müşterileri kendi kuyruklarına ekledik.
             if (customer.isPriority()) {
-                addPriorityCustomerToQueue(customer);
+                addToPriorityCustomerQueue(customer);
             } else {
-                addCustomerToQueue(customer);
+                addToCustomerQueue(customer);
             }
+
+            // Assign the customer to a table
+            tables.get(i).setCustomer(customer);
+            System.out.println(customer.getName() + " joined the queue and is sitting at Table " + tables.get(i).getId());
+
             customerId++;
         }
     }
 
-    //müşterileri kuyruğa ekledik.
-    private static void addCustomerToQueue(Customer customer) {
+
+    private static void addToCustomerQueue(Customer customer) {
         customerQueue.add(customer);
         System.out.println(customer.getName() + " joined the queue.");
     }
 
-    //öncelikli müşterileri öncelikli kuyruğa ekledik.
-    private static void addPriorityCustomerToQueue(Customer customer) {
+    private static void addToPriorityCustomerQueue(Customer customer) {
         priorityCustomerQueue.add(customer);
         System.out.println(customer.getName() + " joined the priority queue.");
     }
-    
-    private static void sitCustomers() {
+
+    private static void seatCustomers() {
         for (int i = 0; i < tables.size(); i++) {
             if (tables.get(i).getCustomer() == null) {
-                
                 if (!priorityCustomerQueue.isEmpty()) {
                     tables.get(i).setCustomer(priorityCustomerQueue.poll());
                 } else {
                     tables.get(i).setCustomer(customerQueue.poll());
                 }
-                
             }
         }
     }
-    
-    private static void siparisleriAl() {
+
+    private static void takeOrders() {
         for (int i = 0; i < tables.size(); i++) {
             if (tables.get(i).getCustomer() != null) {
                 Order order = new Order();
                 order.setTable(tables.get(i));
                 for (Waiter waiter : waiters) {
-                    if (waiters.get(i).isIsActive() == false) {
-                        order.setWaiter(waiters.get(i));
+                    if (!waiter.isIsActive()) {
+                        order.setWaiter(waiter);
+                        break;
                     }
                 }
             }
         }
     }
-    
-}
 
-/*  5-10 sn arasında max 10 tane olmak üzere müşteri üretiyor.
+    private static void simulateRestaurantProcesses() {
+        for (int time = 0; time < SIMULATION_TIME; time += ARRIVAL_INTERVAL) {
+            int arrivingCustomerCount = (int) (Math.random() * 5) + 1;
+            int priorityCustomerCount = arrivingCustomerCount / PRIORITY_CUSTOMER_RATIO;
 
-Random random = new Random();
-        int customerId = 1;
+            totalCustomerCount += arrivingCustomerCount;
+            totalPriorityCustomerCount += priorityCustomerCount;
 
-        while (true) {
-            // 5 ile 10 saniye arasında müşteri ürettiğimiz kod parçası 
-            int waitTime = random.nextInt(10) + 5;
+            System.out.println("Time: " + time + " - Arriving Customer Count: " + arrivingCustomerCount +
+                    " - Priority Customer Count: " + priorityCustomerCount);
 
-            // rastgele müşteri sayısı üret    max:10
-            int numberOfCustomers = random.nextInt(10) + 1;
+            for (Table table : tables) {
+                Customer customer = table.getCustomer();
+                if (customer != null) {
+                    // Customer waiting time
+                    try {
+                        Thread.sleep(CUSTOMER_WAITING_TIME * 100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-            for (int i = 0; i < numberOfCustomers; i++) {
-                // rastgele müşteri
-                Customer customer = new Customer(customerId, "Customer" + customerId, random.nextBoolean());
+                    // Order taking time
+                    takeOrder(table);
 
-                // Müşteri thread'ini başlatın
-                Thread customerThread = new Thread(customer);
-                customerThread.start();
+                    // Cooking time
+                    try {
+                        Thread.sleep(COOKING_TIME * 100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-                //gelen müşteri kuyruğa eklendi
-                addCustomerToQueue(customer);
+                    // Eating time
+                    try {
+                        Thread.sleep(EATING_TIME * 100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-                // Müşteri ID'sini artırın
-                customerId++;
+                    // Payment time
+                    try {
+                        Thread.sleep(PAYMENT_TIME * 100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Clear the table
+                    table.setCustomer(null);
+
+                    // Decrease the customer count after payment
+                    totalCustomerCount--;
+                    if (customer.isPriority()) {
+                        totalPriorityCustomerCount--;
+                    }
+                }
             }
-
-            // Belirlenen süre boyunca bekleme yapın
-            try {
-                Thread.sleep(waitTime * 1000); // Milisaniye cinsinden beklenen süre
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
         }
- */
+    }
+
+    private static void takeOrder(Table table) {
+        Order order = new Order();
+        order.setTable(table);
+        for (Waiter waiter : waiters) {
+            if (!waiter.isIsActive()) {
+                order.setWaiter(waiter);
+                break;
+            }
+        }
+    }
+
+    private static int getTotalCustomerCount() {
+        int totalCustomerCount = 0;
+        for (Table table : tables) {
+            if (table.getCustomer() != null) {
+                totalCustomerCount++;
+            }
+        }
+        return totalCustomerCount;
+    }
+
+    private static int getTotalPriorityCustomerCount() {
+        int totalPriorityCustomerCount = 0;
+        for (Table table : tables) {
+            if (table.getCustomer() != null && table.getCustomer().isPriority()) {
+                totalPriorityCustomerCount++;
+            }
+        }
+        return totalPriorityCustomerCount;
+    }
+}
