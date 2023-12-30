@@ -164,8 +164,10 @@ public class RestaurantManagament {
             if (tables.get(i).getCustomer() == null) {
                 if (!priorityCustomerQueue.isEmpty()) {
                     tables.get(i).setCustomer(priorityCustomerQueue.poll());
+                    tables.get(i).getCustomer().setOturduMu(true);
                 } else if (!customerQueue.isEmpty()) {
                     tables.get(i).setCustomer(customerQueue.poll());
+                    tables.get(i).getCustomer().setOturduMu(true);
                 }
             }
         }
