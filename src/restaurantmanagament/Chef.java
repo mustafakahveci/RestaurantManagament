@@ -1,5 +1,7 @@
 package restaurantmanagament;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import static restaurantmanagament.RestaurantManagament.chefs;
@@ -19,7 +21,15 @@ public class Chef implements Runnable {
 
     @Override
     public void run() {
-        asciyaGonder();
+        while (true) {
+            asciyaGonder();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Waiter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            this.customers = null;
+        }
     }
 
     public int getId() {
@@ -39,6 +49,9 @@ public class Chef implements Runnable {
     }
 
     public List<Customer> getCustomers() {
+        if (customers == null) {
+            customers = new ArrayList<>();
+        }
         return customers;
     }
 
@@ -59,7 +72,8 @@ public class Chef implements Runnable {
         for (int i = 0; i < waiters.size(); i++) {
             if (waiters.get(i).getCustomer() != null) {
                 for (int j = 0; j < chefs.size(); j++) {
-                    if (chefs.get(j).getCustomers().size() < 2) {
+                    List<Customer> chefCustomers = chefs.get(j).getCustomers();
+                    if (chefCustomers != null && chefs.get(j).getCustomers().size() < 2) {
                         chefs.get(j).addCustomertoChef(waiters.get(i).getCustomer());
                         break;
                     }
