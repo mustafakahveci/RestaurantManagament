@@ -31,7 +31,4 @@ public class Cashier implements Runnable{
     public void setName(String name) {
         this.name = name;
     }
-    
-    
-    
 }
