@@ -4,7 +4,7 @@ public class Customer implements Runnable {
 
     private int id;
     private String name;
-    private boolean priority; //öncelik
+    private boolean priority;
 
     public Customer(int id, String name, boolean priority) {
         this.id = id;
@@ -39,14 +39,11 @@ public class Customer implements Runnable {
 
     public void setId(int id) {
         this.id = id;
-    }    
+    }
 
     @Override
     public String toString() {
-        return  name ;
+        return name;
     }
-    
-    
-    
 
 }

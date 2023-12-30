@@ -1,7 +1,6 @@
-
 package restaurantmanagament;
 
-public class Cashier implements Runnable{
+public class Cashier implements Runnable {
 
     private int id;
     private String name;
@@ -10,10 +9,10 @@ public class Cashier implements Runnable{
         this.id = id;
         this.name = name;
     }
-    
+
     @Override
     public void run() {
-        
+
     }
 
     public int getId() {

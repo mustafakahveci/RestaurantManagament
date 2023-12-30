@@ -1,12 +1,12 @@
-
 package restaurantmanagament;
 
 public class Table {
-    
+
     private int id;
     private String name;
     private Customer customer = null;
     private int orderStatus = 0;
+
 
     /*
     order status = sipariş durumu
@@ -16,7 +16,6 @@ public class Table {
     3 -> eating
     !!! enum yapısı kazandırılabilir.
      */
-
     public Table(int id, String name) {
         this.id = id;
         this.name = name;
@@ -53,8 +52,5 @@ public class Table {
     public void setName(String name) {
         this.name = name;
     }
-    
-    
-    
 
 }

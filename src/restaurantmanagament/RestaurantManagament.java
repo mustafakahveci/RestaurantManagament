@@ -13,6 +13,7 @@ public class RestaurantManagament {
     public static List<Table> tables = new ArrayList<>();        // boş masalardan oluşan bir liste
     public static List<Waiter> waiters = new ArrayList<>();
     public static List<Chef> chefs = new ArrayList<>();
+    public static Queue<Customer> siparisVerenMusteriler = new LinkedList<>();
     private static int customerId = 1; // RestaurantManagament sınıfında tanımlanan bir değişken
 
     public static void main(String[] args) {
@@ -89,7 +90,7 @@ public class RestaurantManagament {
             Thread waiterThread = new Thread(waiter);
             waiterThread.start();
         }
-
+/*
         System.out.println("Adım 3 : ve Adım 4 :");
         for (int i = 0; i < waiters.size(); i++) {
             if (waiters.get(i).getCustomer() != null) {
@@ -103,7 +104,7 @@ public class RestaurantManagament {
                     System.out.println(tables.get(i).getCustomer().getName() + " sipariş için beklemede");
                 }
             }
-        }
+        }*/
 
         System.out.println("----------------------------------------------------------------------");
         System.out.println("Adım 5 : ");
@@ -114,9 +115,9 @@ public class RestaurantManagament {
             chefThread.start();
         }
 
-        for (int i = 0; i < chefs.size(); i++) {
+        /*for (int i = 0; i < chefs.size(); i++) {
             System.out.println(chefs.get(i).getName() + "'in müşterileri : " + chefs.get(i).getCustomers().toString());
-        }
+        }*/
     }
 
     //bir seferde en fazla 10 müşteri oluşturan fonksiyon.
@@ -171,4 +172,3 @@ public class RestaurantManagament {
     }
 
 }
-// içtim sarabı sktm arabi

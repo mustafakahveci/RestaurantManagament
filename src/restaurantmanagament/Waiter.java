@@ -2,8 +2,7 @@ package restaurantmanagament;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static restaurantmanagament.RestaurantManagament.tables;
-import static restaurantmanagament.RestaurantManagament.waiters;
+import static restaurantmanagament.RestaurantManagament.*;
 
 public class Waiter implements Runnable {
 
@@ -19,8 +18,9 @@ public class Waiter implements Runnable {
     @Override
     public void run() {
         while (true) {
-            siparisleriAl();
+
             try {
+                siparisleriAl();
                 Thread.sleep(2000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Waiter.class.getName()).log(Level.SEVERE, null, ex);
@@ -55,13 +55,20 @@ public class Waiter implements Runnable {
 
     //garsonların dolu masalara gidip sipariş aldığı fonksiyon
     private void siparisleriAl() {
-        for (int i = 0; i < tables.size(); i++) {
-            if (tables.get(i).getCustomer() != null) {
-                for (int j = 0; j < waiters.size(); j++) {
-                    if (waiters.get(j).getCustomer() == null) {
-                        waiters.get(j).setCustomer(tables.get(i).getCustomer());
-                        tables.get(i).setOrderStatus(1);
-                        break;
+        synchronized (tables) {
+            for (int i = 0; i < tables.size(); i++) {
+                Customer customer = tables.get(i).getCustomer();
+                if (customer != null && tables.get(i).getOrderStatus() == 0) {
+                    synchronized (customer) {
+                        for (int j = 0; j < waiters.size(); j++) {
+                            if (waiters.get(j).getCustomer() == null) {
+                                waiters.get(j).setCustomer(tables.get(i).getCustomer());
+                                tables.get(i).setOrderStatus(1);
+                                siparisVerenMusteriler.add(customer);
+                                System.out.println(waiters.get(j).getName() + " siparişini aldı : " + tables.get(i).getCustomer().getName() + " ve aşçıya iletti...");
+                                break;
+                            }
+                        }
                     }
                 }
             }
