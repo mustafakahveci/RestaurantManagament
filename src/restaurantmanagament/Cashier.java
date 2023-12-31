@@ -5,15 +5,15 @@ import java.util.logging.Logger;
 import static restaurantmanagament.RestaurantManagament.*;
 
 public class Cashier implements Runnable {
-    
+
     private int id;
     private String name;
-    
+
     public Cashier(int id, String name) {
         this.id = id;
         this.name = name;
     }
-    
+
     @Override
     public void run() {
         try {
@@ -23,23 +23,23 @@ public class Cashier implements Runnable {
             Logger.getLogger(Cashier.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     private void hesapAl() {
         if (!kasaKuyrugu.isEmpty()) {
             Customer customer = kasaKuyrugu.poll();
@@ -50,7 +50,7 @@ public class Cashier implements Runnable {
             }
         }
     }
-    
+
     private void masayiBosalt(Customer customer) {
         if (customer.getTable() != null) {
             for (int i = 0; i < tables.size(); i++) {
@@ -60,5 +60,5 @@ public class Cashier implements Runnable {
             }
         }
     }
-    
+
 }

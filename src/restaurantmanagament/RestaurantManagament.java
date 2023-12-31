@@ -1,9 +1,7 @@
 package restaurantmanagament;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,7 +17,6 @@ public class RestaurantManagament {
     public static BlockingQueue<Customer> siparisVerenMusteriler = new LinkedBlockingQueue<>();
     public static BlockingQueue<Customer> chef1Orders = new LinkedBlockingQueue<>();
     public static BlockingQueue<Customer> chef2Orders = new LinkedBlockingQueue<>();
-    public static BlockingQueue<Customer> mutfaktakiSiparisler = new LinkedBlockingQueue<>();
     public static BlockingQueue<Customer> kasaKuyrugu = new LinkedBlockingQueue<>();
     private static int customerId = 1; // RestaurantManagament sınıfında tanımlanan bir değişken
 
@@ -88,8 +85,6 @@ public class RestaurantManagament {
                 System.out.println("Table " + table.getId() + ": boş");
             }
         }
-        System.out.println(customerQueue);
-        System.out.println(priorityCustomerQueue);
         System.out.println("Adım 2 : " + doluMasa + " müşteri masalara yerleştirildi. " + (priorityCustomerQueue.size() + customerQueue.size())
                 + " müşteri beklemede.");
 
