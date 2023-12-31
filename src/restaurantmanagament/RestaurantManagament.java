@@ -1,5 +1,6 @@
 package restaurantmanagament;
 
+<<<<<<< HEAD
 import java.util.*;
 
 public class RestaurantManagament {
@@ -31,6 +32,43 @@ public class RestaurantManagament {
 
         takeOrders();
 
+=======
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
+
+public class RestaurantManagament {
+
+    public static Queue<Customer> customerQueue = new LinkedList<>();    // müşteri sırası için bir kuyruk
+    public static Queue<Customer> priorityCustomerQueue = new LinkedList<>(); // öncelikli müşteri sırası için bir kuyruk
+    public static List<Table> tables = new ArrayList<>();        // boş masalardan oluşan bir liste
+    public static List<Waiter> waiters = new ArrayList<>();
+    public static List<Chef> chefs = new ArrayList<>();
+    public static Queue<Customer> siparisVerenMusteriler = new LinkedList<>();
+    private static int customerId = 1; // RestaurantManagament sınıfında tanımlanan bir değişken
+
+    public static void main(String[] args) {
+
+        initializeRestaurant();
+
+        while (true) {
+            simulateStep();
+            try {
+                Thread.sleep(5000); // 5 saniyede bir adım at
+                System.out.println("                                                      ");
+                System.out.println("                                                      ");
+                System.out.println("                                                      ");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private static void initializeRestaurant() {
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
         Table table1 = new Table(1, "table1");
         Table table2 = new Table(2, "table2");
         Table table3 = new Table(3, "table3");
@@ -53,7 +91,11 @@ public class RestaurantManagament {
 
         Chef chef1 = new Chef(1, "chef1");
         Chef chef2 = new Chef(2, "chef2");
+        chefs.add(chef1);
+        chefs.add(chef2);
+
         Cashier cashier1 = new Cashier(1, "cashier1");
+<<<<<<< HEAD
 
         createCustomers();
         System.out.println("Step 1: " + (priorityCustomerQueue.size() + customerQueue.size()) + " customers arrived."
@@ -61,6 +103,18 @@ public class RestaurantManagament {
 
         seatCustomers();
         int occupiedTables = 0;
+=======
+    }
+
+    private static void simulateStep() {
+        createCustomers();
+        System.out.println("Adım 1 : " + (priorityCustomerQueue.size() + customerQueue.size()) + " müşteri geldi."
+                + " Öncelikli müşteri sayısı : " + priorityCustomerQueue.size());
+
+        sitCustomers();
+        int doluMasa = 0;
+        //masalarda kim oturuyor ? 
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
         for (Table table : tables) {
             if (table.getCustomer() != null) {
                 occupiedTables++;
@@ -69,6 +123,7 @@ public class RestaurantManagament {
                 System.out.println("Table " + table.getId() + ": empty");
             }
         }
+<<<<<<< HEAD
         System.out.println("Step 2: " + occupiedTables + " customers seated at tables. " + (priorityCustomerQueue.size() + customerQueue.size())
                 + " customers in waiting.");
 
@@ -92,11 +147,64 @@ public class RestaurantManagament {
         System.out.println("Total Cost: " + totalCost);
         System.out.println("Total Profit: " + totalProfit);
         System.out.println("Profit: " + profit);
+=======
+        System.out.println("Adım 2 : " + doluMasa + " müşteri masalara yerleştirildi. " + (priorityCustomerQueue.size() + customerQueue.size())
+                + " müşteri beklemede.");
+
+        System.out.println("---------------------------------------------------------------------");
+        //garsonların müşterilerini dolaşalım.
+        //siparisleriAl();
+        // Garson thread'lerini başlat
+        for (Waiter waiter : waiters) {
+            Thread waiterThread = new Thread(waiter);
+            waiterThread.start();
+        }
+/*
+        System.out.println("Adım 3 : ve Adım 4 :");
+        for (int i = 0; i < waiters.size(); i++) {
+            if (waiters.get(i).getCustomer() != null) {
+                System.out.println(waiters.get(i).getName() + "'in müşterisi : " + waiters.get(i).getCustomer().getName() + ", siparişini aşçıya iletti.");
+            }
+        }
+
+        for (int i = 0; i < tables.size(); i++) {
+            if (tables.get(i).getCustomer() != null) {
+                if (tables.get(i).getOrderStatus() == 0) {
+                    System.out.println(tables.get(i).getCustomer().getName() + " sipariş için beklemede");
+                }
+            }
+        }*/
+
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("Adım 5 : ");
+
+        // Aşçı thread'lerini başlat
+        for (Chef chef : chefs) {
+            Thread chefThread = new Thread(chef);
+            chefThread.start();
+        }
+
+        /*for (int i = 0; i < chefs.size(); i++) {
+            System.out.println(chefs.get(i).getName() + "'in müşterileri : " + chefs.get(i).getCustomers().toString());
+        }*/
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
     }
     private static void createCustomers() {
+<<<<<<< HEAD
         Random random = new Random();
         int customerId = 1;
         int numberOfCustomers = random.nextInt(10) + 1;
+=======
+
+        Random random = new Random();
+        // rastgele müşteri sayısı üret    max:10
+        int numberOfCustomers = random.nextInt(10) + 1;
+
+        for (int i = 0; i < numberOfCustomers; i++) {
+
+            // rastgele müşteri
+            Customer customer = new Customer(customerId, "Customer" + customerId, random.nextBoolean());
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
 
         // Ensure that we have enough tables for all customers
         if (numberOfCustomers > tables.size()) {
@@ -134,13 +242,20 @@ public class RestaurantManagament {
         System.out.println(customer.getName() + " joined the priority queue.");
     }
 
+<<<<<<< HEAD
     private static void seatCustomers() {
+=======
+    //müşteriler kuyruğa göre masalara yerleştirildi.
+    private static void sitCustomers() {
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
         for (int i = 0; i < tables.size(); i++) {
             if (tables.get(i).getCustomer() == null) {
                 if (!priorityCustomerQueue.isEmpty()) {
                     tables.get(i).setCustomer(priorityCustomerQueue.poll());
-                } else {
+                    tables.get(i).getCustomer().setOturduMu(true);
+                } else if (!customerQueue.isEmpty()) {
                     tables.get(i).setCustomer(customerQueue.poll());
+<<<<<<< HEAD
                 }
             }
         }
@@ -156,11 +271,15 @@ public class RestaurantManagament {
                         order.setWaiter(waiter);
                         break;
                     }
+=======
+                    tables.get(i).getCustomer().setOturduMu(true);
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
                 }
             }
         }
     }
 
+<<<<<<< HEAD
     private static void simulateRestaurantProcesses() {
         for (int time = 0; time < SIMULATION_TIME; time += ARRIVAL_INTERVAL) {
             int arrivingCustomerCount = (int) (Math.random() * 5) + 1;
@@ -249,4 +368,6 @@ public class RestaurantManagament {
         }
         return totalPriorityCustomerCount;
     }
+=======
+>>>>>>> 28dc2e164323e5e6e1fc5370cad0fe5f138a7de0
 }
