@@ -5,15 +5,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class RestaurantManagament {
 
-    public static Queue<Customer> customerQueue = new LinkedList<>();    // müşteri sırası için bir kuyruk
-    public static Queue<Customer> priorityCustomerQueue = new LinkedList<>(); // öncelikli müşteri sırası için bir kuyruk
+    public static BlockingQueue<Customer> customerQueue = new LinkedBlockingQueue<>();    // müşteri sırası için bir kuyruk
+    public static BlockingQueue<Customer> priorityCustomerQueue = new LinkedBlockingQueue<>(); // öncelikli müşteri sırası için bir kuyruk
     public static List<Table> tables = new ArrayList<>();        // boş masalardan oluşan bir liste
     public static List<Waiter> waiters = new ArrayList<>();
     public static List<Chef> chefs = new ArrayList<>();
-    public static Queue<Customer> siparisVerenMusteriler = new LinkedList<>();
+    public static List<Cashier> cashiers = new ArrayList<>();
+    public static BlockingQueue<Customer> siparisVerenMusteriler = new LinkedBlockingQueue<>();
+    public static BlockingQueue<Customer> chef1Orders = new LinkedBlockingQueue<>();
+    public static BlockingQueue<Customer> chef2Orders = new LinkedBlockingQueue<>();
+    public static BlockingQueue<Customer> mutfaktakiSiparisler = new LinkedBlockingQueue<>();
+    public static BlockingQueue<Customer> kasaKuyrugu = new LinkedBlockingQueue<>();
     private static int customerId = 1; // RestaurantManagament sınıfında tanımlanan bir değişken
 
     public static void main(String[] args) {
@@ -61,6 +68,8 @@ public class RestaurantManagament {
         chefs.add(chef2);
 
         Cashier cashier1 = new Cashier(1, "cashier1");
+        cashiers.add(cashier1);
+
     }
 
     private static void simulateStep() {
@@ -79,6 +88,8 @@ public class RestaurantManagament {
                 System.out.println("Table " + table.getId() + ": boş");
             }
         }
+        System.out.println(customerQueue);
+        System.out.println(priorityCustomerQueue);
         System.out.println("Adım 2 : " + doluMasa + " müşteri masalara yerleştirildi. " + (priorityCustomerQueue.size() + customerQueue.size())
                 + " müşteri beklemede.");
 
@@ -90,7 +101,7 @@ public class RestaurantManagament {
             Thread waiterThread = new Thread(waiter);
             waiterThread.start();
         }
-/*
+        /*
         System.out.println("Adım 3 : ve Adım 4 :");
         for (int i = 0; i < waiters.size(); i++) {
             if (waiters.get(i).getCustomer() != null) {
@@ -115,13 +126,18 @@ public class RestaurantManagament {
             chefThread.start();
         }
 
+        for (Cashier cashier : cashiers) {
+            Thread cashierThread = new Thread(cashier);
+            cashierThread.start();
+        }
+
         /*for (int i = 0; i < chefs.size(); i++) {
             System.out.println(chefs.get(i).getName() + "'in müşterileri : " + chefs.get(i).getCustomers().toString());
         }*/
     }
 
     //bir seferde en fazla 10 müşteri oluşturan fonksiyon.
-    private static void createCustomers() {
+    private static synchronized void createCustomers() {
 
         Random random = new Random();
         // rastgele müşteri sayısı üret    max:10
@@ -147,27 +163,31 @@ public class RestaurantManagament {
     }
 
     //müşterileri kuyruğa ekledik.
-    private static void addCustomerToQueue(Customer customer) {
+    private static synchronized void addCustomerToQueue(Customer customer) {
         customerQueue.add(customer);
         System.out.println(customer.getName() + " joined the queue.");
     }
 
     //öncelikli müşterileri öncelikli kuyruğa ekledik.
-    private static void addPriorityCustomerToQueue(Customer customer) {
+    private static synchronized void addPriorityCustomerToQueue(Customer customer) {
         priorityCustomerQueue.add(customer);
         System.out.println(customer.getName() + " joined the priority queue.");
     }
 
     //müşteriler kuyruğa göre masalara yerleştirildi.
-    private static void sitCustomers() {
+    private static synchronized void sitCustomers() {
         for (int i = 0; i < tables.size(); i++) {
             if (tables.get(i).getCustomer() == null) {
                 if (!priorityCustomerQueue.isEmpty()) {
-                    tables.get(i).setCustomer(priorityCustomerQueue.poll());
-                    tables.get(i).getCustomer().setOturduMu(true);
+                    Customer customer = priorityCustomerQueue.poll();
+                    tables.get(i).setCustomer(customer);
+                    customer.setOturduMu(true);
+                    customer.setTable(tables.get(i));
                 } else if (!customerQueue.isEmpty()) {
-                    tables.get(i).setCustomer(customerQueue.poll());
-                    tables.get(i).getCustomer().setOturduMu(true);
+                    Customer customer = customerQueue.poll();
+                    tables.get(i).setCustomer(customer);
+                    customer.setOturduMu(true);
+                    customer.setTable(tables.get(i));
                 }
             }
         }

@@ -5,7 +5,7 @@ public class Table {
     private int id;
     private String name;
     private Customer customer = null;
-    private int orderStatus = 0;
+    //private int orderStatus = 0;
 
 
     /*
@@ -37,14 +37,13 @@ public class Table {
         this.customer = customer;
     }
 
-    public int getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(int orderStatus) {
-        this.orderStatus = orderStatus;
-    }
-
+//    public int getOrderStatus() {
+//        return orderStatus;
+//    }
+//
+//    public void setOrderStatus(int orderStatus) {
+//        this.orderStatus = orderStatus;
+//    }
     public String getName() {
         return name;
     }

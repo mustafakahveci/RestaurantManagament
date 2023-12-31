@@ -3,7 +3,9 @@ package restaurantmanagament;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import static restaurantmanagament.RestaurantManagament.*;
 
 public class Chef implements Runnable {
@@ -23,7 +25,14 @@ public class Chef implements Runnable {
         while (true) {
             try {
                 asciyaGonder();
-                Thread.sleep(3000);
+                //siparisTamamla();
+                /*if (getId() == 1) {
+                    chef1SiparisTamamla();
+                } else if (getId() == 2) {
+                    chef2SiparisTamamla();
+                }*/
+                ortakSiparisleriTamamla();
+                //Thread.sleep(3000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Waiter.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -80,7 +89,7 @@ public class Chef implements Runnable {
             }
         }
     }*/
-    private static void asciyaGonder() {
+    private static void asciyaGonder() throws InterruptedException {
         synchronized (siparisVerenMusteriler) {
             for (int i = 0; i < siparisVerenMusteriler.size(); i++) {
                 for (int j = 0; j < chefs.size(); j++) {
@@ -90,6 +99,16 @@ public class Chef implements Runnable {
                             synchronized (customer) {
                                 chefs.get(j).addCustomertoChef(customer);
                                 System.out.println(chefs.get(j).getName() + " siparişini hazırlamaya başladı : " + customer);
+                                /*Thread.sleep(3000);
+                                chefs.get(j).getCustomers().remove(customer);
+                                System.out.println(customer+" 'ın siparişi hazır...");*/
+                                customer.setOrderStatus(2);
+                                //mutfaktakiSiparisler.add(customer);
+                                if (chefs.get(i).getId() == 1) {
+                                    chef1Orders.add(customer);
+                                } else if (chefs.get(i).getId() == 2) {
+                                    chef2Orders.add(customer);
+                                }
                                 break;
                             }
                         }
@@ -97,6 +116,95 @@ public class Chef implements Runnable {
                 }
             }
 
+        }
+    }
+
+    private static void siparisTamamla() throws InterruptedException {
+
+        if (!mutfaktakiSiparisler.isEmpty()) {
+
+            Customer customer = mutfaktakiSiparisler.poll();
+            for (int i = 0; i < chefs.size(); i++) {
+                synchronized (chefs.get(i)) {
+                    if (chefs.get(i).getCustomers().contains(customer)) {
+                        Thread.sleep(3000);
+                        chefs.get(i).getCustomers().remove(customer);
+                        System.out.println(customer + " 'ın siparişi hazır...");
+                        customer.setOrderStatus(3);
+                        customer.eating();
+                        break;
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    private void chef1SiparisTamamla() throws InterruptedException {
+        synchronized (chef1Orders) {
+            if (!chef1Orders.isEmpty()) {
+
+                Customer customer = chef1Orders.poll();
+
+                if (this.getCustomers().contains(customer)) {
+                    Thread.sleep(3000);
+                    this.getCustomers().remove(customer);
+                    System.out.println(customer + " 'ın siparişi hazır...");
+                    customer.setOrderStatus(3);
+                    customer.eating();
+                }
+
+            }
+        }
+    }
+
+    private void chef2SiparisTamamla() throws InterruptedException {
+        synchronized (chef2Orders) {
+            if (!chef2Orders.isEmpty()) {
+
+                Customer customer = chef2Orders.poll();
+
+                if (this.getCustomers().contains(customer)) {
+                    Thread.sleep(3000);
+                    this.getCustomers().remove(customer);
+                    System.out.println(customer + " 'ın siparişi hazır...");
+                    customer.setOrderStatus(3);
+                    customer.eating();
+                }
+
+            }
+        }
+    }
+
+    private void ortakSiparisleriTamamla() throws InterruptedException {
+        for (int i = 0; i < chefs.size(); i++) {
+            Chef chef = chefs.get(i);
+            synchronized (chef) {
+                if (chef.getId() == 1) {
+                    if (!chef1Orders.isEmpty()) {
+                        Customer customer = chef1Orders.poll();
+                        if (chef.getCustomers().contains(customer)) {
+                            Thread.sleep(3000);
+                            chef.getCustomers().remove(customer);
+                            System.out.println(customer + " 'ın siparişi hazır...");
+                            customer.setOrderStatus(3);
+                            customer.eating();
+                        }
+                    }
+                } else if (chef.getId() == 2) {
+                    if (!chef2Orders.isEmpty()) {
+                        Customer customer = chef2Orders.poll();
+                        if (chef.getCustomers().contains(customer)) {
+                            Thread.sleep(3000);
+                            chef.getCustomers().remove(customer);
+                            System.out.println(customer + " 'ın siparişi hazır...");
+                            customer.setOrderStatus(3);
+                            customer.eating();
+                        }
+                    }
+                }
+            }
         }
     }
 
